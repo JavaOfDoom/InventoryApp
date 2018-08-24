@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Inventory App</string>
+
+    <string name="action_insert_dummy_data">Insert Dummy Data</string>
+    <string name="action_delete_all_entries">Delete All Books</string>
+    <string name="editor_activity_title_new_book">Add a Book</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+
+    <string name="category_book_details">Book Details</string>
+    <string name="category_supplier">Supplier Info</string>
+
+    <string name="hint_book_title">Book Title</string>
+    <string name="hint_book_price">19.99</string>
+    <string name="hint_book_quantity">10</string>
+    <string name="hint_supplier_name">Fantasy Books</string>
+    <string name="hint_supplier_phone_number">555-555-1234</string>
+
+</resources>
