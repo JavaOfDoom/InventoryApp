@@ -21,7 +21,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:orientation="vertical"
-            android:paddingLeft="4dp">
+            android:paddingLeft="4dp"
+            android:paddingStart="4dp"
+            tools:ignore="RtlSymmetry">
 
             <EditText
                 android:id="@+id/edit_book_title"
@@ -59,7 +61,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:orientation="vertical"
-            android:paddingLeft="4dp">
+            android:paddingLeft="4dp"
+            android:paddingStart="4dp"
+            tools:ignore="RtlSymmetry">
 
             <EditText
                 android:id="@+id/edit_supplier_name"

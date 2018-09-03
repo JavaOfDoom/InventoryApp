@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/details_book_title"
+        style="@style/LargeText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/medium_spacing"
+        android:gravity="center"
+        tools:text="Book Title" />
+
+    <RelativeLayout
+        android:id="@+id/quantity_and_price"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/details_book_title"
+        android:orientation="horizontal"
+        android:padding="@dimen/light_spacing">
+
+        <TextView
+            android:id="@+id/details_quantity"
+            style="@style/MediumText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:padding="@dimen/light_spacing"
+            android:text="@string/quantity_label"
+            tools:text="Quantity" />
+
+        <Button
+            android:id="@+id/details_decrease"
+            style="@style/ButtonStyle"
+            android:layout_width="@dimen/button_size"
+            android:layout_height="@dimen/button_size"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/details_quantity"
+            android:layout_toRightOf="@+id/details_quantity"
+            android:text="@string/decrease_button"
+            tools:text="-" />
+
+        <TextView
+            android:id="@+id/details_quantity_number"
+            style="@style/MediumText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/details_decrease"
+            android:layout_toRightOf="@+id/details_decrease"
+            android:padding="@dimen/light_spacing"
+            tools:text="10" />
+
+        <Button
+            android:id="@+id/details_increase"
+            style="@style/ButtonStyle"
+            android:layout_width="@dimen/button_size"
+            android:layout_height="@dimen/button_size"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/details_quantity_number"
+            android:layout_toRightOf="@+id/details_quantity_number"
+            android:text="@string/increase_button"
+            tools:text="+" />
+
+        <TextView
+            android:id="@+id/details_price"
+            style="@style/MediumText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            tools:ignore="RelativeOverlap"
+            tools:text="Price $19.99" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/quantity_and_price"
+        android:orientation="horizontal"
+        android:padding="@dimen/medium_spacing">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/light_spacing">
+
+            <TextView
+                android:id="@+id/details_supplier_name"
+                style="@style/MediumText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Supplier Name" />
+
+            <TextView
+                android:id="@+id/details_supplier_phone_number"
+                style="@style/MediumText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="555-555-1234" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/details_order"
+            style="@style/ButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/button_size"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:padding="@dimen/light_spacing"
+            android:text="@string/order_button"
+            tools:ignore="RelativeOverlap"
+            tools:text="order" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:padding="@dimen/light_spacing">
+
+        <Button
+            android:id="@+id/details_edit"
+            style="@style/ButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/button_size"
+            android:layout_margin="@dimen/medium_spacing"
+            android:layout_weight="1"
+            android:text="@string/edit_button"
+            tools:text="edit" />
+
+        <Button
+            android:id="@+id/details_delete"
+            style="@style/ButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/button_size"
+            android:layout_margin="@dimen/medium_spacing"
+            android:layout_weight="1"
+            android:text="@string/delete_button"
+            tools:text="delete" />
+
+    </LinearLayout>
+
+</RelativeLayout>

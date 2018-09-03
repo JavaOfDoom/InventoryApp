@@ -26,25 +26,17 @@ public class InventoryCursorAdapter extends CursorAdapter {
         TextView titleTextView = view.findViewById(R.id.book_title);
         TextView priceTextView = view.findViewById(R.id.price);
         TextView quantityTextView = view.findViewById(R.id.quantity);
-        TextView supplierNameTextView = view.findViewById(R.id.supplier_name);
-        TextView supplierPhoneNumberTextView = view.findViewById(R.id.supplier_phone_number);
 
         int titleColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_PRODUCT_NAME);
         int priceColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_PRICE);
         int quantityColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_QUANTITY);
-        int supplierNameColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_SUPPLIER_NAME);
-        int supplierPhoneNumberColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER);
 
         String bookTitle = cursor.getString(titleColumnIndex);
         String bookPrice = cursor.getString(priceColumnIndex);
         String bookQuantity = cursor.getString(quantityColumnIndex);
-        String bookSupplierName = cursor.getString(supplierNameColumnIndex);
-        String bookSupplierPhoneNumber = cursor.getString(supplierPhoneNumberColumnIndex);
 
         titleTextView.setText(bookTitle);
         priceTextView.setText(bookPrice);
         quantityTextView.setText(bookQuantity);
-        supplierNameTextView.setText(bookSupplierName);
-        supplierPhoneNumberTextView.setText(bookSupplierPhoneNumber);
     }
 }

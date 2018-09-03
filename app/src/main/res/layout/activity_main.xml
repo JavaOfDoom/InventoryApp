@@ -22,30 +22,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/missing_books"/>
+            android:src="@drawable/missing_books"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/empty_title_text"
+            style="@style/LargeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/missing_books_image"
             android:layout_centerHorizontal="true"
-            android:fontFamily="sans-serif-medium"
-            android:padding="16dp"
-            android:text="@string/empty_view_main_text"
-            android:textAppearance="?android:textAppearanceMedium"/>
+            android:padding="@dimen/medium_spacing"
+            android:text="@string/empty_view_main_text" />
 
         <TextView
             android:id="@+id/empty_subtitle_text"
+            style="@style/MediumText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/empty_title_text"
             android:layout_centerHorizontal="true"
-            android:fontFamily="sans-serif"
-            android:paddingTop="8dp"
-            android:text="@string/empty_view_helper_text"
-            android:textAppearance="?android:textAppearanceSmall"
-            android:textColor="#A2AAB0"/>
+            android:paddingLeft="@dimen/medium_spacing"
+            android:paddingRight="@dimen/medium_spacing"
+            android:text="@string/empty_view_helper_text" />
 
     </RelativeLayout>
 
@@ -54,8 +53,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add_circle_black_24dp"/>
+        android:src="@drawable/ic_add_circle_black_24dp" />
 
 </RelativeLayout>

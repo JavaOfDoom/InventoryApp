@@ -7,15 +7,16 @@
     <string name="editor_activity_title_edit_book_info">Edit Book Info</string>
     <string name="action_save">Save</string>
     <string name="action_delete">Delete</string>
+    <string name="sale_button">sale</string>
 
     <string name="category_book_details">Book Details</string>
     <string name="category_supplier">Supplier Info</string>
 
     <string name="hint_book_title">Book Title</string>
-    <string name="hint_book_price">19.99</string>
-    <string name="hint_book_quantity">10</string>
+    <string name="hint_book_price">Price $19.99</string>
+    <string name="hint_book_quantity">Quantity 10</string>
     <string name="hint_supplier_name">Fantasy Books</string>
-    <string name="hint_supplier_phone_number">555-555-1234</string>
+    <string name="hint_supplier_phone_number">555&#8211;555&#8211;1234</string>
 
     <string name="empty_view_main_text">Adventure to another world seems to be missing!</string>
     <string name="empty_view_helper_text">There is nothing in the inventory,
@@ -35,5 +36,12 @@
     <string name="delete_dialog_msg">Delete this pet?</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
+
+    <string name="decrease_button">&#8212;</string>
+    <string name="increase_button">+</string>
+    <string name="order_button">order</string>
+    <string name="edit_button">edit</string>
+    <string name="delete_button">delete</string>
+    <string name="quantity_label">Quantity</string>
 
 </resources>
