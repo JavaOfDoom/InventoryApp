@@ -21,13 +21,17 @@
 
         <activity
             android:name=".EditorActivity"
-            android:label="@string/editor_activity_title_new_book"
             android:parentActivityName=".MainActivity"
             android:theme="@style/EditorTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+
+        <provider
+            android:name=".data.InventoryProvider"
+            android:authorities="com.example.joe.inventoryapp"
+            android:exported="false" />
     </application>
 
 </manifest>

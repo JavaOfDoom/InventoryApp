@@ -4,6 +4,7 @@
     <string name="action_insert_dummy_data">Insert Dummy Data</string>
     <string name="action_delete_all_entries">Delete All Books</string>
     <string name="editor_activity_title_new_book">Add a Book</string>
+    <string name="editor_activity_title_edit_book_info">Edit Book Info</string>
     <string name="action_save">Save</string>
     <string name="action_delete">Delete</string>
 
@@ -15,5 +16,24 @@
     <string name="hint_book_quantity">10</string>
     <string name="hint_supplier_name">Fantasy Books</string>
     <string name="hint_supplier_phone_number">555-555-1234</string>
+
+    <string name="empty_view_main_text">Adventure to another world seems to be missing!</string>
+    <string name="empty_view_helper_text">There is nothing in the inventory,
+    get started by adding a book.</string>
+
+    <string name="error_book">Error with saving book info</string>
+    <string name="saved_book">Book info saved!</string>
+    <string name="update_error">Error with updating book info</string>
+    <string name="update_saved">Book updated successfully!</string>
+    <string name="delete_error">Error with deleting book info</string>
+    <string name="delete_success">Book deleted</string>
+
+    <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
+    <string name="discard">Discard</string>
+    <string name="keep_editing">Keep Editing</string>
+
+    <string name="delete_dialog_msg">Delete this pet?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
 
 </resources>

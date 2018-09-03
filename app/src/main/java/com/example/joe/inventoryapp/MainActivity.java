@@ -1,30 +1,40 @@
 package com.example.joe.inventoryapp;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.Toast;
 
-import com.example.joe.inventoryapp.data.BookDbHelper;
 import com.example.joe.inventoryapp.data.BookContract.BookEntry;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private BookDbHelper bookDbHelper;
+    private static final int BOOK_LOADER = 0;
+
+    InventoryCursorAdapter cursorAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -32,78 +42,27 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        bookDbHelper = new BookDbHelper(this);
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        displayDatabaseInfo();
-    }
+        ListView bookListView = findViewById(R.id.book_list);
+        View emptyView = findViewById(R.id.empty_view);
+        bookListView.setEmptyView(emptyView);
 
-    private void displayDatabaseInfo() {
+        cursorAdapter = new InventoryCursorAdapter(this, null);
+        bookListView.setAdapter(cursorAdapter);
 
-        SQLiteDatabase database = bookDbHelper.getReadableDatabase();
-
-        String[] projection = {
-                BookEntry._ID,
-                BookEntry.COLUMN_PRODUCT_NAME,
-                BookEntry.COLUMN_PRICE,
-                BookEntry.COLUMN_QUANTITY,
-                BookEntry.COLUMN_SUPPLIER_NAME,
-                BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER
-        };
-
-        Cursor cursor = database.query(
-                BookEntry.TABLE_NAME,
-                projection,
-                null,
-                null,
-                null,
-                null,
-                null);
-        TextView displayView = (TextView) findViewById(R.id.text_view_book);
-
-        try {
-            displayView.setText("The books table contains " + cursor.getCount() + " books.\n\n");
-            displayView.append(BookEntry._ID + " - " +
-                BookEntry.COLUMN_PRODUCT_NAME + " - " +
-                BookEntry.COLUMN_PRICE + " - " +
-                BookEntry.COLUMN_QUANTITY + " - " +
-                BookEntry.COLUMN_SUPPLIER_NAME + " - " +
-                BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER + "\n");
-
-            int idColumnIndex = cursor.getColumnIndex(BookEntry._ID);
-            int titleColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_PRODUCT_NAME);
-            int priceColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_PRICE);
-            int quantityColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_QUANTITY);
-            int supplierNameColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_SUPPLIER_NAME);
-            int supplierPhoneNumberColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER);
-
-            while (cursor.moveToNext()) {
-                int currentID = cursor.getInt(idColumnIndex);
-                String currentTitle = cursor.getString(titleColumnIndex);
-                String currentPrice = cursor.getString(priceColumnIndex);
-                String currentQuantity = cursor.getString(quantityColumnIndex);
-                String currentSupplierName = cursor.getString(supplierNameColumnIndex);
-                String currentSupplierPhoneNumber = cursor.getString(supplierPhoneNumberColumnIndex);
-
-                displayView.append(("\n" +
-                    currentID + " - " +
-                    currentTitle + " - " +
-                    currentPrice + " - " +
-                    currentQuantity + " - " +
-                    currentSupplierName + " - " +
-                    currentSupplierPhoneNumber));
+        bookListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this, EditorActivity.class);
+                Uri currentBookUri = ContentUris.withAppendedId(BookEntry.CONTENT_URI, id);
+                intent.setData(currentBookUri);
+                startActivity(intent);
             }
-        } finally {
-            cursor.close();
-        }
+        });
+        getLoaderManager().initLoader(BOOK_LOADER, null, this);
     }
 
     private void insertBook() {
-
-        SQLiteDatabase database = bookDbHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(BookEntry.COLUMN_PRODUCT_NAME, "A Good Book");
@@ -112,7 +71,13 @@ public class MainActivity extends AppCompatActivity {
         values.put(BookEntry.COLUMN_SUPPLIER_NAME, "Fantasy Books");
         values.put(BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER, "555-555-1234");
 
-        long newRowId = database.insert(BookEntry.TABLE_NAME, null, values);
+        Uri newUri = getContentResolver().insert(BookEntry.CONTENT_URI, values);
+
+        if (newUri == null) {
+            Toast.makeText(this, R.string.error_book, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, R.string.saved_book, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -126,11 +91,44 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_insert_dummy_data:
                 insertBook();
-                displayDatabaseInfo();
                 return true;
             case R.id.action_delete_all_entries:
+                deleteAllBooks();
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @NonNull
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, @Nullable Bundle bundle) {
+        String[] projection = {
+                BookEntry._ID,
+                BookEntry.COLUMN_PRODUCT_NAME,
+                BookEntry.COLUMN_PRICE,
+                BookEntry.COLUMN_QUANTITY,
+                BookEntry.COLUMN_SUPPLIER_NAME,
+                BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER};
+        return new CursorLoader(this,
+                BookEntry.CONTENT_URI,
+                projection,
+                null,
+                null,
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        cursorAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        cursorAdapter.swapCursor(null);
+    }
+
+    private void deleteAllBooks() {
+        int rowsDeleted = getContentResolver().delete(BookEntry.CONTENT_URI, null, null);
+        Log.v("Main Activity", rowsDeleted + " rows deleted from inventory database");
     }
 }

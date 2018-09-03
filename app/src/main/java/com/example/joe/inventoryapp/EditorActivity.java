@@ -1,42 +1,80 @@
 package com.example.joe.inventoryapp;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.joe.inventoryapp.data.BookContract;
-import com.example.joe.inventoryapp.data.BookDbHelper;
+import com.example.joe.inventoryapp.data.BookContract.BookEntry;
 
-public class EditorActivity extends AppCompatActivity {
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-    private EditText titleEditText;
-    private EditText priceEditText;
-    private EditText quantityEditText;
-    private EditText supplierNameEditText;
-    private EditText supplierPhoneNumberEditText;
+public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private int quantity = 0;
+    private static final int EXISTING_BOOK_LOADER = 0;
+    @BindView(R.id.edit_book_title)
+    EditText titleEditText;
+    @BindView(R.id.edit_book_price)
+    EditText priceEditText;
+    @BindView(R.id.edit_book_quantity)
+    EditText quantityEditText;
+    @BindView(R.id.edit_supplier_name)
+    EditText supplierNameEditText;
+    @BindView(R.id.edit_supplier_phone_number)
+    EditText supplierPhoneNumberEditText;
+    private Uri currentBookUri;
+    private boolean bookHasChanged = false;
+
+    private View.OnTouchListener touchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            bookHasChanged = true;
+            return false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
-        titleEditText = findViewById(R.id.edit_book_title);
-        priceEditText = findViewById(R.id.edit_book_price);
-        quantityEditText = findViewById(R.id.edit_book_quantity);
-        supplierNameEditText = findViewById(R.id.edit_supplier_name);
-        supplierPhoneNumberEditText = findViewById(R.id.edit_supplier_phone_number);
+        Intent intent = getIntent();
+        currentBookUri = intent.getData();
+
+        if (currentBookUri == null) {
+            setTitle(R.string.editor_activity_title_new_book);
+            invalidateOptionsMenu();
+        } else {
+            setTitle(getString(R.string.editor_activity_title_edit_book_info));
+            getSupportLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
+        }
+
+        ButterKnife.bind(this);
+
+        titleEditText.setOnTouchListener(touchListener);
+        priceEditText.setOnTouchListener(touchListener);
+        quantityEditText.setOnTouchListener(touchListener);
+        supplierNameEditText.setOnTouchListener(touchListener);
+        supplierPhoneNumberEditText.setOnTouchListener(touchListener);
     }
 
-    private void insertBook() {
-
+    private void saveBook() {
         String titleString = titleEditText.getText().toString().trim();
         String priceString = priceEditText.getText().toString().trim();
         String quantityString = quantityEditText.getText().toString().trim();
@@ -45,23 +83,36 @@ public class EditorActivity extends AppCompatActivity {
         Double price = Double.parseDouble(priceString);
         int quantity = Integer.parseInt(quantityString);
 
-        BookDbHelper bookDbHelper = new BookDbHelper(this);
-        SQLiteDatabase database = bookDbHelper.getWritableDatabase();
+        if (currentBookUri == null && TextUtils.isEmpty(titleString) && TextUtils.isEmpty(quantityString)
+                && TextUtils.isEmpty(supplierNameString)) {
+            return;
+        }
 
         ContentValues values = new ContentValues();
-        values.put(BookContract.BookEntry.COLUMN_PRODUCT_NAME, titleString);
-        values.put(BookContract.BookEntry.COLUMN_PRICE, price);
-        values.put(BookContract.BookEntry.COLUMN_QUANTITY, quantity);
-        values.put(BookContract.BookEntry.COLUMN_SUPPLIER_NAME, supplierNameString);
-        values.put(BookContract.BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER, supplierPhoneNumberString);
+        values.put(BookEntry.COLUMN_PRODUCT_NAME, titleString);
+        values.put(BookEntry.COLUMN_PRICE, price);
+        values.put(BookEntry.COLUMN_QUANTITY, quantity);
+        values.put(BookEntry.COLUMN_SUPPLIER_NAME, supplierNameString);
+        values.put(BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER, supplierPhoneNumberString);
 
-        long newRowId = database.insert(BookContract.BookEntry.TABLE_NAME, null, values);
+        if (currentBookUri == null) {
+            Uri newUri = getContentResolver().insert(BookEntry.CONTENT_URI, values);
 
-        if (newRowId == -1) {
-            Toast.makeText(this, "Error with saving book", Toast.LENGTH_LONG).show();
+            if (newUri == null) {
+                Toast.makeText(this, getString(R.string.error_book), Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, getString(R.string.saved_book), Toast.LENGTH_LONG).show();
+            }
         } else {
-            Toast.makeText(this, "Book saved with row id: " + newRowId, Toast.LENGTH_LONG).show();
+            int rowsAffected = getContentResolver().update(currentBookUri, values, null, null);
+
+            if (rowsAffected == 0) {
+                Toast.makeText(this, getString(R.string.update_error), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, getString(R.string.update_saved), Toast.LENGTH_SHORT).show();
+            }
         }
+
     }
 
     @Override
@@ -71,18 +122,154 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        if (currentBookUri == null) {
+            MenuItem menuItem = menu.findItem(R.id.action_delete);
+            menuItem.setVisible(false);
+        }
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
-                insertBook();
+                saveBook();
                 finish();
                 return true;
             case R.id.action_delete:
+                showDeleteConfirmationDialog();
                 return true;
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
+                if (!bookHasChanged) {
+                    NavUtils.navigateUpFromSameTask(this);
+                    return true;
+                }
+
+                DialogInterface.OnClickListener discardButtonClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        NavUtils.navigateUpFromSameTask(EditorActivity.this);
+                    }
+                };
+                showUnsavedChangesDialog(discardButtonClickListener);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!bookHasChanged) {
+            super.onBackPressed();
+            return;
+        }
+        DialogInterface.OnClickListener discardButtonClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        };
+        showUnsavedChangesDialog(discardButtonClickListener);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        String[] projection = {
+                BookEntry._ID,
+                BookEntry.COLUMN_PRODUCT_NAME,
+                BookEntry.COLUMN_PRICE,
+                BookEntry.COLUMN_QUANTITY,
+                BookEntry.COLUMN_SUPPLIER_NAME,
+                BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER};
+        return new CursorLoader(this,
+                BookEntry.CONTENT_URI,
+                projection,
+                null,
+                null,
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (cursor == null || cursor.getCount() < 1) {
+            return;
+        }
+        if (cursor.moveToFirst()) {
+            int titleColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_PRODUCT_NAME);
+            int priceColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_PRICE);
+            int quantityColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_QUANTITY);
+            int supplierNameColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_SUPPLIER_NAME);
+            int supplierPhoneNumberColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER);
+
+            String title = cursor.getString(titleColumnIndex);
+            Double price = cursor.getDouble(priceColumnIndex);
+            String quantity = cursor.getString(quantityColumnIndex);
+            String supplierName = cursor.getString(supplierNameColumnIndex);
+            String supplierPhoneNumber = cursor.getString(supplierPhoneNumberColumnIndex);
+
+            titleEditText.setText(title);
+            priceEditText.setText(Double.toString(price));
+            quantityEditText.setText(quantity);
+            supplierNameEditText.setText(supplierName);
+            supplierPhoneNumberEditText.setText(supplierPhoneNumber);
+        }
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        titleEditText.setText("");
+        priceEditText.setText("");
+        quantityEditText.setText("");
+        supplierNameEditText.setText("");
+        supplierPhoneNumberEditText.setText("");
+    }
+
+    private void showUnsavedChangesDialog(DialogInterface.OnClickListener discardButtonClickListener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.unsaved_changes_dialog_msg);
+        builder.setPositiveButton(R.string.discard, discardButtonClickListener);
+        builder.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void showDeleteConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                deleteBook();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void deleteBook() {
+        if (currentBookUri != null) {
+            int rowsDeleted = getContentResolver().delete(currentBookUri, null, null);
+            if (rowsDeleted == 0) {
+                Toast.makeText(this, getString(R.string.delete_error), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, getString(R.string.delete_success), Toast.LENGTH_SHORT).show();
+            }
+        }
+        finish();
     }
 }
