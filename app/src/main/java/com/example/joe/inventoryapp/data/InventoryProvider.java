@@ -32,8 +32,11 @@ public class InventoryProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection,
-                        String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(Uri uri,
+                        String[] projection,
+                        String selection,
+                        String[] selectionArgs,
+                        String sortOrder) {
         SQLiteDatabase database = bookDbHelper.getReadableDatabase();
 
         Cursor cursor;
@@ -41,14 +44,24 @@ public class InventoryProvider extends ContentProvider {
         int match = uriMatcher.match(uri);
         switch (match) {
             case BOOKS:
-                cursor = database.query(BookEntry.TABLE_NAME, projection, selection, selectionArgs,
-                        null, null, sortOrder);
+                cursor = database.query(BookEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
                 break;
             case BOOK_ID:
                 selection = BookEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                cursor = database.query(BookEntry.TABLE_NAME, projection, selection, selectionArgs,
-                        null, null, sortOrder);
+                cursor = database.query(BookEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
                 break;
             default:
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
@@ -73,6 +86,11 @@ public class InventoryProvider extends ContentProvider {
         String title = contentValues.getAsString(BookEntry.COLUMN_PRODUCT_NAME);
         if (title == null) {
             throw new IllegalArgumentException("Book requires a title.");
+        }
+
+        Double price = contentValues.getAsDouble(BookEntry.COLUMN_PRICE);
+        if (price != null && price < 0) {
+            throw new IllegalArgumentException("Requires valid price.");
         }
 
         Integer quantity = contentValues.getAsInteger(BookEntry.COLUMN_QUANTITY);
@@ -122,7 +140,7 @@ public class InventoryProvider extends ContentProvider {
 
         if (contentValues.containsKey(BookEntry.COLUMN_QUANTITY)) {
             Integer quantity = contentValues.getAsInteger(BookEntry.COLUMN_QUANTITY);
-            if (quantity != null || quantity < 0) {
+            if (quantity != null && quantity < 0) {
                 throw new IllegalArgumentException("Requires valid quantity.");
             }
         }

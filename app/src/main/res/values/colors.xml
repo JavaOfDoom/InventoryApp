@@ -4,9 +4,6 @@
     <color name="colorPrimaryDark">#017101</color>
     <color name="colorAccent">#3D993D</color>
 
-    <!-- Primary color for the editor -->
     <color name="editorColorPrimary">#9740FF</color>
-
-    <!-- Primary dark color for the editor -->
     <color name="editorColorPrimaryDark">#7933CC</color>
 </resources>

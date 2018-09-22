@@ -6,11 +6,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
+import android.app.LoaderManager;
 import android.support.v4.app.NavUtils;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AlertDialog;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -28,6 +28,9 @@ import butterknife.ButterKnife;
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int EXISTING_BOOK_LOADER = 0;
+
+    private Uri currentBookUri;
+
     @BindView(R.id.edit_book_title)
     EditText titleEditText;
     @BindView(R.id.edit_book_price)
@@ -38,12 +41,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     EditText supplierNameEditText;
     @BindView(R.id.edit_supplier_phone_number)
     EditText supplierPhoneNumberEditText;
-    private Uri currentBookUri;
+
     private boolean bookHasChanged = false;
 
     private View.OnTouchListener touchListener = new View.OnTouchListener() {
         @Override
-        public boolean onTouch(View v, MotionEvent event) {
+        public boolean onTouch(View view, MotionEvent motionEvent) {
             bookHasChanged = true;
             return false;
         }
@@ -62,7 +65,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             invalidateOptionsMenu();
         } else {
             setTitle(getString(R.string.editor_activity_title_edit_book_info));
-            getSupportLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
+            getLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
         }
 
         ButterKnife.bind(this);
@@ -80,20 +83,23 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String quantityString = quantityEditText.getText().toString().trim();
         String supplierNameString = supplierNameEditText.getText().toString().trim();
         String supplierPhoneNumberString = supplierPhoneNumberEditText.getText().toString().trim();
-        Double price = Double.parseDouble(priceString);
-        int quantity = Integer.parseInt(quantityString);
-
-        if (currentBookUri == null && TextUtils.isEmpty(titleString) && TextUtils.isEmpty(quantityString)
-                && TextUtils.isEmpty(supplierNameString)) {
-            return;
-        }
+        /*Double price = Double.parseDouble(priceString);
+        int quantity = Integer.parseInt(quantityString);*/
 
         ContentValues values = new ContentValues();
         values.put(BookEntry.COLUMN_PRODUCT_NAME, titleString);
-        values.put(BookEntry.COLUMN_PRICE, price);
-        values.put(BookEntry.COLUMN_QUANTITY, quantity);
+        values.put(BookEntry.COLUMN_PRICE, priceString);
+        values.put(BookEntry.COLUMN_QUANTITY, quantityString);
         values.put(BookEntry.COLUMN_SUPPLIER_NAME, supplierNameString);
         values.put(BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER, supplierPhoneNumberString);
+
+        if (currentBookUri == null || TextUtils.isEmpty(titleString)
+                || TextUtils.isEmpty(priceString)
+                || TextUtils.isEmpty(quantityString)
+                || TextUtils.isEmpty(supplierNameString)
+                || TextUtils.isEmpty(supplierPhoneNumberString)) {
+            Toast.makeText(this, "Enter valid data", Toast.LENGTH_SHORT).show();
+        }
 
         if (currentBookUri == null) {
             Uri newUri = getContentResolver().insert(BookEntry.CONTENT_URI, values);
@@ -110,7 +116,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 Toast.makeText(this, getString(R.string.update_error), Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, getString(R.string.update_saved), Toast.LENGTH_SHORT).show();
-            }
+            }            //noinspection deprecation
+
         }
 
     }
@@ -143,7 +150,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 return true;
             case android.R.id.home:
                 if (!bookHasChanged) {
-                    NavUtils.navigateUpFromSameTask(this);
+                    NavUtils.navigateUpFromSameTask(EditorActivity.this);
                     return true;
                 }
 
@@ -184,7 +191,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 BookEntry.COLUMN_SUPPLIER_NAME,
                 BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER};
         return new CursorLoader(this,
-                BookEntry.CONTENT_URI,
+                currentBookUri,
                 projection,
                 null,
                 null,
@@ -204,18 +211,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             int supplierPhoneNumberColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER);
 
             String title = cursor.getString(titleColumnIndex);
-            Double price = cursor.getDouble(priceColumnIndex);
-            String quantity = cursor.getString(quantityColumnIndex);
+            double price = cursor.getDouble(priceColumnIndex);
+            int quantity = cursor.getInt(quantityColumnIndex);
             String supplierName = cursor.getString(supplierNameColumnIndex);
             String supplierPhoneNumber = cursor.getString(supplierPhoneNumberColumnIndex);
 
             titleEditText.setText(title);
             priceEditText.setText(Double.toString(price));
-            quantityEditText.setText(quantity);
+            quantityEditText.setText(Integer.toString(quantity));
             supplierNameEditText.setText(supplierName);
             supplierPhoneNumberEditText.setText(supplierPhoneNumber);
         }
-
     }
 
     @Override
