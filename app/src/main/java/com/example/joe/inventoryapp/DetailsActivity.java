@@ -1,15 +1,20 @@
 package com.example.joe.inventoryapp;
 
+import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.joe.inventoryapp.data.BookContract.BookEntry;
 
@@ -18,10 +23,7 @@ import butterknife.ButterKnife;
 
 public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final int EXISITNG_BOOK_LOADER = 0;
-
-    private Uri currentBookUri;
-
+    private static final int EXISTING_BOOK_LOADER = 0;
     @BindView(R.id.details_book_title)
     TextView titleDisplayText;
     @BindView(R.id.details_price)
@@ -32,6 +34,19 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     TextView supplierNameDisplayView;
     @BindView(R.id.details_supplier_phone_number)
     TextView supplierPhoneNumberDisplayText;
+    @BindView(R.id.details_decrease)
+    Button decreaseBook;
+    @BindView(R.id.details_increase)
+    Button increaseBook;
+    @BindView(R.id.details_order)
+    Button orderBook;
+    @BindView(R.id.details_edit)
+    Button editBook;
+    @BindView(R.id.details_delete)
+    Button deleteBook;
+    private int quantity;
+    private String supplierPhoneNumber;
+    private Uri currentBookUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,10 +56,69 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         Intent intent = getIntent();
         currentBookUri = intent.getData();
 
-        setTitle("Details");
-        getLoaderManager().initLoader(EXISITNG_BOOK_LOADER, null, (android.app.LoaderManager.LoaderCallbacks<Object>) this);
+        setTitle(getString(R.string.details_title));
+        getLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
 
         ButterKnife.bind(this);
+
+        decreaseBook.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (quantity > 0) {
+                    quantity--;
+                    ContentValues values = new ContentValues();
+                    values.put(BookEntry.COLUMN_QUANTITY, quantity);
+                    DetailsActivity.this.getContentResolver().update(currentBookUri,
+                            values,
+                            null,
+                            null);
+                } else {
+                    Toast.makeText(DetailsActivity.this, R.string.out_of_stock,
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        increaseBook.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                quantity++;
+                ContentValues values = new ContentValues();
+                values.put(BookEntry.COLUMN_QUANTITY, quantity);
+                DetailsActivity.this.getContentResolver().update(currentBookUri,
+                        values,
+                        null,
+                        null);
+            }
+        });
+
+        orderBook.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentOrder = new Intent(Intent.ACTION_DIAL);
+                intentOrder.setData(Uri.parse("tel:" + supplierPhoneNumber.trim()));
+
+                if (intentOrder.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intentOrder);
+                }
+            }
+        });
+
+        editBook.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentEdit = new Intent(DetailsActivity.this, EditorActivity.class);
+                intentEdit.setData(currentBookUri);
+                startActivity(intentEdit);
+            }
+        });
+
+        deleteBook.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteBook();
+            }
+        });
     }
 
     @Override
@@ -64,6 +138,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                 null);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (cursor == null || cursor.getCount() < 1) {
@@ -78,9 +153,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
             String title = cursor.getString(titleColumnIndex);
             double price = cursor.getDouble(priceColumnIndex);
-            int quantity = cursor.getInt(quantityColumnIndex);
+            quantity = cursor.getInt(quantityColumnIndex);
             String supplierName = cursor.getString(supplierNameColumnIndex);
-            String supplierPhoneNumber = cursor.getString(supplierPhoneNumberColumnIndex);
+            supplierPhoneNumber = cursor.getString(supplierPhoneNumberColumnIndex);
 
             titleDisplayText.setText(title);
             priceDisplayText.setText(Double.toString(price));
@@ -99,4 +174,15 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         supplierPhoneNumberDisplayText.setText("");
     }
 
+    private void deleteBook() {
+        if (currentBookUri != null) {
+            int rowsDeleted = getContentResolver().delete(currentBookUri, null, null);
+            if (rowsDeleted == 0) {
+                Toast.makeText(this, getString(R.string.delete_error), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, getString(R.string.delete_success), Toast.LENGTH_SHORT).show();
+            }
+        }
+        finish();
+    }
 }

@@ -33,7 +33,7 @@
     <string name="discard">Discard</string>
     <string name="keep_editing">Keep Editing</string>
 
-    <string name="delete_dialog_msg">Delete this pet?</string>
+    <string name="delete_dialog_msg">Delete this Book?</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
 
@@ -43,5 +43,8 @@
     <string name="edit_button">edit</string>
     <string name="delete_button">delete</string>
     <string name="quantity_label">Quantity</string>
+    <string name="out_of_stock">Product is out of stock</string>
+    <string name="details_title">Details</string>
+    <string name="valid_data">Enter valid data</string>
 
 </resources>

@@ -1,5 +1,6 @@
 package com.example.joe.inventoryapp;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,9 +29,6 @@ import butterknife.ButterKnife;
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int EXISTING_BOOK_LOADER = 0;
-
-    private Uri currentBookUri;
-
     @BindView(R.id.edit_book_title)
     EditText titleEditText;
     @BindView(R.id.edit_book_price)
@@ -41,10 +39,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     EditText supplierNameEditText;
     @BindView(R.id.edit_supplier_phone_number)
     EditText supplierPhoneNumberEditText;
-
+    private Uri currentBookUri;
     private boolean bookHasChanged = false;
 
     private View.OnTouchListener touchListener = new View.OnTouchListener() {
+        @SuppressLint("ClickableViewAccessibility")
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
             bookHasChanged = true;
@@ -52,6 +51,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     };
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,8 +83,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String quantityString = quantityEditText.getText().toString().trim();
         String supplierNameString = supplierNameEditText.getText().toString().trim();
         String supplierPhoneNumberString = supplierPhoneNumberEditText.getText().toString().trim();
-        /*Double price = Double.parseDouble(priceString);
-        int quantity = Integer.parseInt(quantityString);*/
 
         ContentValues values = new ContentValues();
         values.put(BookEntry.COLUMN_PRODUCT_NAME, titleString);
@@ -98,7 +96,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 || TextUtils.isEmpty(quantityString)
                 || TextUtils.isEmpty(supplierNameString)
                 || TextUtils.isEmpty(supplierPhoneNumberString)) {
-            Toast.makeText(this, "Enter valid data", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.valid_data, Toast.LENGTH_SHORT).show();
         }
 
         if (currentBookUri == null) {
@@ -198,6 +196,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 null);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (cursor == null || cursor.getCount() < 1) {
