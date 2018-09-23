@@ -158,7 +158,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             supplierPhoneNumber = cursor.getString(supplierPhoneNumberColumnIndex);
 
             titleDisplayText.setText(title);
-            priceDisplayText.setText(Double.toString(price));
+            priceDisplayText.setText("$ " + Double.toString(price));
             quantityNumberDisplayText.setText(Integer.toString(quantity));
             supplierNameDisplayView.setText(supplierName);
             supplierPhoneNumberDisplayText.setText(supplierPhoneNumber);

@@ -46,7 +46,7 @@ public class InventoryCursorAdapter extends CursorAdapter {
         final Uri uri = ContentUris.withAppendedId(BookEntry.CONTENT_URI, cursor.getInt(uriColumnIndex));
 
         titleTextView.setText(bookTitle);
-        priceTextView.setText(Double.toString(bookPrice));
+        priceTextView.setText("$ " + Double.toString(bookPrice));
         quantityTextView.setText(Integer.toString(bookQuantity));
 
         saleButton.setOnClickListener(new View.OnClickListener() {

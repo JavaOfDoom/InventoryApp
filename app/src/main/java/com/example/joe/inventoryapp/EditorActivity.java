@@ -13,7 +13,6 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -84,40 +83,44 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String supplierNameString = supplierNameEditText.getText().toString().trim();
         String supplierPhoneNumberString = supplierPhoneNumberEditText.getText().toString().trim();
 
-        ContentValues values = new ContentValues();
-        values.put(BookEntry.COLUMN_PRODUCT_NAME, titleString);
-        values.put(BookEntry.COLUMN_PRICE, priceString);
-        values.put(BookEntry.COLUMN_QUANTITY, quantityString);
-        values.put(BookEntry.COLUMN_SUPPLIER_NAME, supplierNameString);
-        values.put(BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER, supplierPhoneNumberString);
-
-        if (currentBookUri == null || TextUtils.isEmpty(titleString)
-                || TextUtils.isEmpty(priceString)
-                || TextUtils.isEmpty(quantityString)
-                || TextUtils.isEmpty(supplierNameString)
-                || TextUtils.isEmpty(supplierPhoneNumberString)) {
-            Toast.makeText(this, R.string.valid_data, Toast.LENGTH_SHORT).show();
-        }
-
-        if (currentBookUri == null) {
-            Uri newUri = getContentResolver().insert(BookEntry.CONTENT_URI, values);
-
-            if (newUri == null) {
-                Toast.makeText(this, getString(R.string.error_book), Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, getString(R.string.saved_book), Toast.LENGTH_LONG).show();
-            }
+        if (titleString.isEmpty()) {
+            Toast.makeText(this, R.string.enter_valid_title, Toast.LENGTH_SHORT).show();
+        } else if (priceString.isEmpty()) {
+            Toast.makeText(this, R.string.enter_valid_price, Toast.LENGTH_SHORT).show();
+        } else if (quantityString.isEmpty() || Integer.parseInt(quantityString) < 0) {
+            Toast.makeText(this, R.string.enter_valid_quantity, Toast.LENGTH_SHORT).show();
+        } else if (supplierNameString.isEmpty()) {
+            Toast.makeText(this, R.string.enter_valid_supplier_name, Toast.LENGTH_SHORT).show();
+        } else if (supplierPhoneNumberString.isEmpty()) {
+            Toast.makeText(this, R.string.enter_valid_supplier_phone_number, Toast.LENGTH_SHORT).show();
         } else {
-            int rowsAffected = getContentResolver().update(currentBookUri, values, null, null);
 
-            if (rowsAffected == 0) {
-                Toast.makeText(this, getString(R.string.update_error), Toast.LENGTH_SHORT).show();
+            ContentValues values = new ContentValues();
+            values.put(BookEntry.COLUMN_PRODUCT_NAME, titleString);
+            values.put(BookEntry.COLUMN_PRICE, priceString);
+            values.put(BookEntry.COLUMN_QUANTITY, quantityString);
+            values.put(BookEntry.COLUMN_SUPPLIER_NAME, supplierNameString);
+            values.put(BookEntry.COLUMN_SUPPLIER_PHONE_NUMBER, supplierPhoneNumberString);
+
+            if (currentBookUri == null) {
+                Uri newUri = getContentResolver().insert(BookEntry.CONTENT_URI, values);
+
+                if (newUri == null) {
+                    Toast.makeText(this, getString(R.string.error_book), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, getString(R.string.saved_book), Toast.LENGTH_LONG).show();
+                }
             } else {
-                Toast.makeText(this, getString(R.string.update_saved), Toast.LENGTH_SHORT).show();
-            }            //noinspection deprecation
+                int rowsAffected = getContentResolver().update(currentBookUri, values, null, null);
 
+                if (rowsAffected == 0) {
+                    Toast.makeText(this, getString(R.string.update_error), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, getString(R.string.update_saved), Toast.LENGTH_SHORT).show();
+                }
+            }
+            finish();
         }
-
     }
 
     @Override
@@ -141,7 +144,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         switch (item.getItemId()) {
             case R.id.action_save:
                 saveBook();
-                finish();
                 return true;
             case R.id.action_delete:
                 showDeleteConfirmationDialog();

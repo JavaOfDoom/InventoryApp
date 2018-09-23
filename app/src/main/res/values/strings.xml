@@ -45,6 +45,12 @@
     <string name="quantity_label">Quantity</string>
     <string name="out_of_stock">Product is out of stock</string>
     <string name="details_title">Details</string>
+
     <string name="valid_data">Enter valid data</string>
+    <string name="enter_valid_title">Enter valid book title</string>
+    <string name="enter_valid_price">Enter valid price and with a decimal</string>
+    <string name="enter_valid_quantity">Enter valid quantity</string>
+    <string name="enter_valid_supplier_name">Enter valid supplier name</string>
+    <string name="enter_valid_supplier_phone_number">Enter valid supplier phone number</string>
 
 </resources>
